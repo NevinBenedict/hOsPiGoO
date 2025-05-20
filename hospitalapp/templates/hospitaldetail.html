@@ -1,0 +1,112 @@
+{% extends 'userbase.html' %}
+
+{% block title %}Hospital Details - {{ hospital.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto bg-white rounded-xl shadow-xl p-8 md:p-10 my-12">
+    <!-- Hospital Header -->
+    <div class="flex flex-col md:flex-row items-center mb-10">
+        {% if hospital.image %}
+            <img src="{{ hospital.image.url }}" alt="{{ hospital.name }} image" class="w-32 h-32 md:w-48 md:h-48 rounded-lg object-cover border-2 border-blue-200 mb-4 md:mb-0 md:mr-6">
+        {% else %}
+            <img src="https://cdn-icons-png.flaticon.com/512/387/387561.png" alt="Default hospital image" class="w-32 h-32 md:w-48 md:h-48 rounded-lg object-cover border-2 border-blue-200 mb-4 md:mb-0 md:mr-6">
+        {% endif %}
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-800 mb-4">{{ hospital.name|slice:":-3" }}</h1>
+            <p class="text-gray-600 text-lg mb-2"><span class="font-semibold">Location:</span> {{ hospital.place }}</p>
+            <p class="text-gray-600 text-lg mb-2"><span class="font-semibold">Address:</span> {{ hospital.address|default:"Not provided" }}</p>
+            <p class="text-gray-600 text-lg mb-2"><span class="font-semibold">Email:</span> {{ hospital.email }}</p>
+            {% if hospital.description %}
+                <p class="text-gray-600 text-lg"><span class="font-semibold">About:</span> {{ hospital.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Departments Section -->
+    <div class="mb-10">
+        <h2 class="text-2xl font-semibold text-blue-700 mb-4">Departments</h2>
+        {% if dept %}
+            <div class="flex flex-wrap gap-3">
+                {% for department in dept %}
+                    <span class="department-badge px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium" aria-label="Department: {{ department.name }}">{{ department.name }}</span>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-lg">No departments found.</p>
+        {% endif %}
+    </div>
+
+    <!-- Doctors Section -->
+    <div>
+        <h2 class="text-2xl font-semibold text-blue-700 mb-4">Doctors</h2>
+        {% if doctor %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for doc in doctor %}
+                    <div class="doctor-card border border-blue-100 rounded-lg p-6 bg-white shadow-md flex flex-col hover:bg-blue-50" role="region" aria-label="Doctor profile: {{ doc.doctor.username }}">
+                        <div class="flex items-center mb-4">
+                            <img src="https://cdn-icons-png.flaticon.com/512/387/387561.png" alt="Profile picture of {{ doc.doctor.username }}" class="w-16 h-16 rounded-full border-2 border-blue-200 mr-4 object-cover">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800">{{ doc.doctor.username }}</h3>
+                                <p class="text-gray-500 text-sm">{{ doc.doctor.email }}</p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <span class="font-semibold text-gray-700">Department:</span>
+                            <span class="department-badge ml-2">{{ doc.department.name }}</span>
+                        </div>
+                        <div class="mb-4">
+                            <span class="font-semibold text-gray-700">Hospital:</span>
+                            <span class="ml-2 text-gray-600">{{ doc.hospital.name }}</span>
+                        </div>
+                        <a href="{% url 'slotdisplays' doc.id %}" class="btn mt-auto" aria-label="View available slots for {{ doc.doctor.username }}">Book a Slot</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-lg">No doctors found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Card hover effect */
+    .doctor-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button styling */
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(to right, #3b82f6, #60a5fa);
+        color: white;
+        text-align: center;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .btn:hover {
+        background: linear-gradient(to right, #2563eb, #3b82f6);
+        transform: scale(1.05);
+    }
+    .btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.5);
+    }
+
+    /* Department badge */
+    .department-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background-color: #e0f2fe;
+        color: #1e40af;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Appointment Slots{% endblock %}
+{% block content %}
+    <div class="max-w-4xl mx-auto dashboard-container p-8">
+        <h1 class="text-3xl font-bold mb-6 text-center text-pastel-navy">Available Appointment Slots</h1>
+        {% if slots %}
+            <div class="flex flex-wrap gap-4 justify-center">
+                {% for slot in slots %}
+                    <button
+                        type="button"
+                        onclick=window.location.href="{% url 'appdetail' slot.id %}"
+                        
+                        class=" w-32 px-6 py-3 rounded border-2 font-semibold text-base shadow-sm transition-transform
+                            {% if slot.is_booked %}
+                                border-gray-400 text-gray-400 bg-gray-100  hover:scale-105
+                            {% else %}
+                                border-green-500 text-green-700 bg-green-50 cursor-not-allowed 
+                            {% endif %}"
+                        {% if not slot.is_booked %}disabled{% endif %}
+                    >
+                        {{ slot.time|slice:":5" }}
+                    </button>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-pastel-navy no-slots">No slots available.</p>
+        {% endif %}
+    </div>
+{% endblock %}

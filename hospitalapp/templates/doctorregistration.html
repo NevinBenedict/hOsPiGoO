@@ -1,0 +1,55 @@
+{% extends 'loginbase.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+    <div class="bg-white rounded-lg shadow-lg p-14 w-full max-w-lg">
+        <h1 class="text-2xl font-bold text-center text-blue-500 mb-6">Doctor Registration</h1>
+        <form action="" method="post" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label for="id_hospital" class="block text-gray-700 font-semibold mb-1">
+                    {{ form.hospital.label }}
+                </label>
+                {{ form.hospital }}
+            </div>
+            <div>
+                <label for="id_department" class="block text-gray-700 font-semibold mb-1">
+                    {{ form.department.label }}
+                </label>
+                {{ form.department }}
+            </div>
+            <div>
+                <button type="submit" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded transition">
+                    Register
+                </button>
+            </div>
+        </form>
+    </div>
+    <script>
+        // Add IDs to selects if not already present
+        if (document.getElementsByName('hospital')[0]) {
+            document.getElementsByName('hospital')[0].id = 'id_hospital';
+        }
+        if (document.getElementsByName('department')[0]) {
+            document.getElementsByName('department')[0].id = 'id_department';
+        }
+
+        document.getElementById('id_hospital').addEventListener('change', function() {
+            var hospitalId = this.value;
+            var departmentSelect = document.getElementById('id_department');
+            departmentSelect.innerHTML = '<option value="">---------</option>'; // Clear
+
+            if (hospitalId) {
+                fetch(`/hospital/ajax/get-departments/?hospital_id=${hospitalId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(function(dept) {
+                            var option = document.createElement('option');
+                            option.value = dept.id;
+                            option.text = dept.name;
+                            departmentSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    </script>
+{% endblock %}

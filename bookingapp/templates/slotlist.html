@@ -1,0 +1,48 @@
+{% extends 'userbase.html' %}
+{% block title %}Patient Home{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto p-8 md:p-10">
+    
+    <form method="get" class="flex flex-col sm:flex-row justify-center items-center mb-10 gap-4">
+        <label for="date" class="font-semibold text-gray-700 text-lg">Select Date:</label>
+        <select name="date" id="date" class="border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+            {% for d in all_dates %}
+                <option value="{{ d|date:'Y-m-d' }}" {% if d|date:'Y-m-d' == selected_date %}selected{% endif %}>{{ d|date:'F j, Y' }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200">Filter</button>
+    </form>
+    {% if slots %}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-center">
+            {% for slot in slots %}
+                <form action="{% url 'appointment' slot.id %}" method="post">
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        {% if slot.is_booked %}disabled{% endif %}
+                        class="slot-button w-full px-6 py-3 rounded-lg border-2 text-base font-semibold
+                            {% if slot.is_booked %}
+                                border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed
+                            {% else %}
+                                border-green-500 text-green-700 bg-green-50 hover:bg-green-100 hover:scale-105 cursor-pointer
+                            {% endif %}
+                            shadow-sm transition duration-200"
+                        aria-label="{% if slot.is_booked %}Booked slot at {{ slot.time|slice:':5' }}{% else %}Book slot at {{ slot.time|slice:':5' }}{% endif %}"
+                    >
+                        {{ slot.time|slice:":5" }}
+                    </button>
+                </form>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-500 text-lg">No slots available for the selected date.</p>
+    {% endif %}
+    
+  {% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
+{%endblock%}

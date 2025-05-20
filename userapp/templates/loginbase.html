@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Health Portal{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Georgia', 'Roboto', serif;
+            font-size: 16px;
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            background: none;
+        }
+        .bg-img-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("https://t3.ftcdn.net/jpg/02/19/91/48/240_F_219914874_fcqxEeJ6clfwf43OcCNAMGNBySKzF5hl.jpg") center center / cover no-repeat;
+            opacity: 0.9;
+        }
+        nav{
+            background: white;
+            opacity: 10;
+            height: 50px;
+            
+
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            transform: translateY(-2px);
+            color: #D4A017; /* text-pastel-gold */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .content-container {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hamburger div {
+            transition: all 0.3s ease;
+        }
+        .hamburger.active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active .line2 {
+            opacity: 0;
+        }
+        .hamburger.active .line3 {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        /* Dark pastel colors */
+        .text-pastel-navy { color: #4B5EAA; }
+        .text-pastel-gold { color: #D4A017; }
+        .bg-pastel-gray { background-color: #6B7280; }
+        .text-navy-800 { color: #1e3a8a; }
+        .text-pastel-red { color: #dc2626; }
+        .border-pastel-navy { border-color: #4B5EAA; }
+        .focus\:ring-pastel-navy:focus { --tw-ring-color: #4B5EAA; }
+    </style>
+</head>
+<body class="bg-gray-200 min-h-screen flex flex-col">
+    <div class="bg-img-overlay"></div>
+    <!-- Navbar -->
+    <nav class="bg-navy-800 bg-opacity-90 shadow-lg fixed  top-0 left-0 w-full z-20" role="navigation" aria-label="Main navigation">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-pastel-gold" aria-label="Health Portal Home">hOsPiGoO</a>
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-6">
+                {% if current_page != 'login' %}
+                    <a href="{% url 'login' %}" class="nav-link text-pastel-navy" aria-label="Login">Login</a>
+                {% endif %}
+                {% if current_page != 'register' %}
+                    <a href="{% url 'register' %}" class="nav-link text-pastel-navy" aria-label="Register as User">Register as User</a>
+                {% endif %}
+                {% if current_page != 'docregister' %}
+                    <a href="{% url 'docregister' %}" class="nav-link text-pastel-navy" aria-label="Register as Doctor">Register as Doctor</a>
+                {% endif %}
+            </div>
+            <!-- Hamburger Menu -->
+            <div class="md:hidden flex items-center">
+                <button class="hamburger focus:outline-none" tabindex="0" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <div class="line1 w-6 h-0.5 bg-pastel-gray mb-1.5"></div>
+                    <div class="line2 w-6 h-0.5 bg-pastel-gray mb-1.5"></div>
+                    <div class="line3 w-6 h-0.5 bg-pastel-gray"></div>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-navy-800 bg-opacity-90 px-4 py-4">
+            {% if current_page != 'login' %}
+                <a href="{% url 'login' %}" class="block py-2 nav-link text-pastel-navy" aria-label="Login">Login</a>
+            {% endif %}
+            {% if current_page != 'register' %}
+                <a href="{% url 'register' %}" class="block py-2 nav-link text-pastel-navy" aria-label="Register as User">Register as User</a>
+            {% endif %}
+            {% if current_page != 'docregister' %}
+                <a href="{% url 'docregister' %}" class="block py-2 nav-link text-pastel-navy" aria-label="Register as Doctor">Register as Doctor</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-3xl mx-auto mt-2 py-6 text-navy-800 flex items-center justify-center min-h-[calc(100vh-12rem)] content-container">
+        {% block content %}
+            <!-- Fallback content to ensure visibility -->
+            <p class="text-center text-lg">Welcome to the Health Portal. Please select an option from the navigation menu.</p>
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-navy-800 py-6">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-sm mb-4 md:mb-0 text-pastel-gold">
+                © {{ year|default:2025 }} Health Portal. All rights reserved.
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="text-pastel-navy hover:text-pastel-gold transition-colors" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-pastel-navy hover:text-pastel-gold transition-colors" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-pastel-navy hover:text-pastel-gold transition-colors" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="" class="text-pastel-navy hover:text-pastel-gold transition-colors" aria-label="Contact Us">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Hamburger Menu -->
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const mobileMenu = document.querySelector('.mobile-menu');
+
+        function toggleMenu() {
+            const isActive = hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('block');
+            hamburger.setAttribute('aria-expanded', isActive);
+        }
+
+        hamburger.addEventListener('click', toggleMenu);
+        hamburger.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleMenu();
+            }
+        });
+
+        // Close mobile menu when a link is clicked
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('block');
+                hamburger.setAttribute('aria-expanded', 'false');
+            });
+        });
+    </script>
+</body>
+</html>

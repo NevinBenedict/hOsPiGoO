@@ -1,0 +1,110 @@
+
+
+{% extends 'base.html' %}
+{% block title %}OTP Verification{% endblock %}
+{% block content %}
+    <style>
+        .btn-primary {
+            background: linear-gradient(to right, #4B5EAA, #D4A017) !important;
+            color: #fff !important;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            transition: background 0.3s ease, transform 0.2s ease;
+            z-index: 10;
+            opacity: 1;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #D4A017, #4B5EAA) !important;
+            transform: scale(1.05);
+        }
+        .otp-input {
+            width: 3rem;
+            height: 3rem;
+            border: 1px solid #4B5EAA;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 1.25rem;
+            margin: 0 0.25rem;
+        }
+        .otp-input:focus {
+            border-color: #4B5EAA;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(75, 94, 170, 0.2);
+        }
+        .text-pastel-navy { color: #4B5EAA; }
+        .text-pastel-gold { color: #D4A017; }
+        .text-navy-800 { color: #1e3a8a; }
+        .text-pastel-red { color: #dc2626; }
+        .border-pastel-navy { border-color: #4B5EAA; }
+        .focus\:ring-pastel-navy:focus { --tw-ring-color: #4B5EAA; }
+    </style>
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md mt-8 animate-fadeIn">
+        <i class="fa-solid fa-envelope text-pastel-navy text-4xl mb-4 mx-auto block"></i>
+        <h2 class="text-2xl font-bold text-center mb-2 text-pastel-navy">OTP Verification</h2>
+        <p class="text-sm text-navy-800 mb-6 text-center">
+            One Time Password (OTP) has been sent via Email.
+            Enter the OTP below to verify it.
+        </p>
+        {% if form.non_field_errors %}
+            <div class="mb-4 p-3 bg-red-100 border border-red-400 text-pastel-red rounded">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        <form method="POST" action="{% url 'docregotp' %}">
+            {% csrf_token %}
+            <label for="otp1" class="sr-only">Enter OTP</label>
+            <div class="flex justify-center mb-6">
+                <input type="text" name="otp1" id="otp1" maxlength="1" class="otp-input" aria-describedby="otp-error" required>
+                <input type="text" name="otp2" id="otp2" maxlength="1" class="otp-input" aria-describedby="otp-error" required>
+                <input type="text" name="otp3" id="otp3" maxlength="1" class="otp-input" aria-describedby="otp-error" required>
+                <input type="text" name="otp4" id="otp4" maxlength="1" class="otp-input" aria-describedby="otp-error" required>
+            </div>
+            <button type="submit" class="btn-primary w-full shadow-sm" aria-label="Verify OTP">Verify OTP</button>
+        </form>
+        <p id="tme" class="text-sm text-navy-800 mt-4 text-center">
+            Resend OTP in <span id="timer">30</span> seconds.
+        </p>
+        <form action="{% url 'resendregotp' %}" method="post" class="mt-2 text-center">
+            {% csrf_token %}
+            <button type="submit" id="resend-btn" class="text-pastel-navy hover:text-pastel-gold disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:text-gray-500" disabled aria-disabled="true" aria-label="Resend OTP"></button>
+        </form>
+    </div>
+
+    <script>
+        let timer = 30;
+        const timerElement = document.getElementById('timer');
+        const resendButton = document.getElementById('resend-btn');
+        const tmeElement = document.getElementById('tme');
+        const otpInputs = document.querySelectorAll('.otp-input');
+
+        const countdown = setInterval(() => {
+            timer--;
+            timerElement.textContent = timer;
+
+            if (timer <= 0) {
+                clearInterval(countdown);
+                tmeElement.textContent = '';
+                resendButton.disabled = false;
+                resendButton.setAttribute('aria-disabled', 'false');
+                resendButton.textContent = 'Resend OTP';
+                resendButton.classList.remove('text-pastel-navy', 'disabled:text-gray-500', 'disabled:cursor-not-allowed');
+                resendButton.classList.add('btn-primary', 'inline-block', 'px-4', 'py-2', 'shadow-sm');
+            }
+        }, 1000);
+
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                if (input.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+    </script>
+{% endblock %}

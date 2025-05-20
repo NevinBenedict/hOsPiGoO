@@ -1,0 +1,77 @@
+{% extends 'loginbase.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    {% load socialaccount %}
+    <style>
+        .btn-primary {
+            background: linear-gradient(to right, #4B5EAA, #D4A017) !important;
+            color: #fff !important;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            transition: background 0.3s ease, transform 0.2s ease;
+            z-index: 10;
+            opacity: 1;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #D4A017, #4B5EAA) !important;
+            transform: scale(1.05);
+        }
+        .form-control {
+            border: 1px solid #4B5EAA;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            width: 100%;
+        }
+        .form-control:focus {
+            border-color: #4B5EAA;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(75, 94, 170, 0.2);
+        }
+        .text-pastel-navy { color: #4B5EAA; }
+        .text-pastel-gold { color: #D4A017; }
+        .text-navy-800 { color: #1e3a8a; }
+        .text-pastel-red { color: #dc2626; }
+        .border-pastel-navy { border-color: #4B5EAA; }
+        .focus\:ring-pastel-navy:focus { --tw-ring-color: #4B5EAA; }
+    </style>
+    <div class="bg-white rounded-lg shadow-md p-10 max-w-2xl mx-auto mt-12 animate-fadeIn" style="min-width: 400px;">
+        <h2 class="text-3xl font-bold text-center mb-8 text-pastel-navy">Login</h2>
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="mb-4 p-3 bg-red-100 border border-red-400 text-pastel-red rounded">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            <div class="mb-6">
+                <label for="username" class="block text-lg font-medium text-pastel-navy">Username</label>
+                <input type="text" name="username" id="username" class="form-control text-lg" placeholder="Enter Username" required>
+                {% if form.username.errors %}
+                    <p class="text-pastel-red text-xs mt-1" id="username_error">{{ form.username.errors }}</p>
+                {% endif %}
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-lg font-medium text-pastel-navy">Password</label>
+                <input type="password" name="password" id="password" class="form-control text-lg" placeholder="Enter Password" required>
+                {% if form.password.errors %}
+                    <p class="text-pastel-red text-xs mt-1" id="password_error">{{ form.password.errors }}</p>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn-primary w-full py-3 text-lg">Login</button>
+        </form>
+        <p class="mt-6 text-center text-base text-navy-800">
+            Don't have an account? 
+            <a href="{% url 'register' %}" class="text-pastel-navy hover:text-pastel-gold">Register</a>
+        </p>
+        <p class="mt-2 text-center text-base text-navy-800">
+            Forgot your password? 
+            <a href="{% url 'forgotpassword' %}" class="text-pastel-navy hover:text-pastel-gold">Reset it</a>
+        </p>
+        <p class="mt-6 text-center text-base text-navy-800">
+            Or login with:
+            <a href="{% provider_login_url 'google' %}?next=/booking/patienthome/" class="text-pastel-navy hover:text-pastel-gold">Google <i class="fa-brands fa-google"></i></a>
+        </p>
+    </div>
+{% endblock %}

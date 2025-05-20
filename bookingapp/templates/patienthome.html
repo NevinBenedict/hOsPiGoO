@@ -1,0 +1,240 @@
+{% extends 'userbase.html' %}
+{% block title %}Patient Home{% endblock %}
+{% block content %}
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(59, 130, 246, 0.2), rgba(94, 234, 212, 0.2));
+            animation: fadeIn 1s ease-in;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hospital-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hospital-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .specialty-card {
+            transition: transform 0.3s ease;
+        }
+        .specialty-card:hover {
+            transform: scale(1.05);
+        }
+        .testimonial-card {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+        }
+        .search-bar {
+            transition: box-shadow 0.3s ease;
+        }
+        .search-bar:focus {
+            box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.3);
+        }
+          /* Modal and button styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="hero-section py-12 text-center w-full">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <h1 class="text-4xl sm:text-5xl font-bold text-soft-navy mb-4">Welcome to Your Patient Portal</h1>
+            <p class="text-xl sm:text-2xl text-soft-navy mb-6">We’ll treat you well with world-class care and compassion.</p>
+            <button id="createSlotBtn"  class="btn-primary inline-block px-6 py-3 text-lg shadow-sm" aria-label="Book an Appointment">Book Appointment</button>
+        </div>
+    </section>
+    <!-- Modal for creating a slot -->
+    <div id="slotModal" class="modal">
+    <div class="modal-content">
+        <h2 class="text-2xl font-semibold mb-6 text-pastel-navy">Create Appointment Slot</h2>
+        <form id="slotForm" action="{% url 'doctorlist' %}" method="POST">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="hospital" class="block text-pastel-navy font-medium mb-2">Hospital</label>
+                <select id="hospital" name="hospital" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-navy" required>
+                    <option value="" disabled selected>Select Hospital</option>
+                    {% for hospital in data %}
+                        <option value="{{ hospital.id }}">{{ hospital.name|slice:":-3"  }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="department" class="block text-pastel-navy font-medium mb-2">Department</label>
+                <select id="department" name="department" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-navy" required>
+                    <option value="" disabled selected>Select Department</option>
+                    {% for department in departments %}
+                        <option value="{{ department.id }}">{{ department.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <button type="button" id="cancelBtn" class="text-pastel-navy px-4 py-2 rounded hover:text-pastel-gold">Cancel</button>
+                <button type="submit" class="btn-primary bg-gray-700 text-white px-6 py-2 rounded-lg">Book</button>
+            </div>
+        </form>
+    </div>
+</div>
+    <!-- Hospital Search and List -->
+    <section class="py-12 bg-gray-50 w-full">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-soft-navy mb-6 text-center">Find a Hospital</h2>
+            <div class="mb-8 max-w-lg mx-auto">
+                <input type="text" id="hospital-search" class="search-bar w-full p-3 border border-teal-500 rounded-lg text-soft-navy focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Search hospitals..." aria-label="Search hospitals">
+            </div>
+            <div id="hospital-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for hospital in data %}
+                    <div class="hospital-card bg-white p-6 rounded-lg shadow-sm" data-name="{{ hospital.name|lower }}">
+                        <h3 class="text-xl font-semibold text-soft-navy mb-2">{{ hospital.name|slice:":-3" }}</h3>
+                        <p class="text-soft-navy mb-4">{{ hospital.place|default:"Address not available" }}</p>
+                        <a href="{% url 'hosdetails' hospital.id %}" class="btn-primary inline-block px-4 py-2" aria-label="View details of {{ hospital.name }}">View Details</a>
+                    </div>
+                {% empty %}
+                    <p class="text-soft-navy text-center col-span-full">No hospitals available.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Specialties Section -->
+    <section class="py-12 w-full">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-soft-navy mb-6 text-center">Our Specialties</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="specialty-card bg-white p-6 rounded-lg shadow-sm text-center">
+                    <i class="fas fa-heartbeat text-teal-500 text-3xl mb-4"></i>
+                    <h3 class="text-lg font-semibold text-soft-navy mb-2">Cardiology</h3>
+                    <p class="text-soft-navy">Expert care for heart health with advanced diagnostics and treatments.</p>
+                </div>
+                <div class="specialty-card bg-white p-6 rounded-lg shadow-sm text-center">
+                    <i class="fas fa-brain text-teal-500 text-3xl mb-4"></i>
+                    <h3 class="text-lg font-semibold text-soft-navy mb-2">Neurology</h3>
+                    <p class="text-soft-navy">Comprehensive neurological care for brain and nerve disorders.</p>
+                </div>
+                <div class="specialty-card bg-white p-6 rounded-lg shadow-sm text-center">
+                    <i class="fas fa-bone text-teal-500 text-3xl mb-4"></i>
+                    <h3 class="text-lg font-semibold text-soft-navy mb-2">Orthopaedics</h3>
+                    <p class="text-soft-navy">Advanced treatments for bones, joints, and musculoskeletal issues.</p>
+                </div>
+                <div class="specialty-card bg-white p-6 rounded-lg shadow-sm text-center">
+                    <i class="fas fa-stethoscope text-teal-500 text-3xl mb-4"></i>
+                    <h3 class="text-lg font-semibold text-soft-navy mb-2">General Medicine</h3>
+                    <p class="text-soft-navy">Holistic care for overall health and wellness.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-12 bg-gray-50 w-full">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-soft-navy mb-6 text-center">Patient Stories</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="testimonial-card p-6 rounded-lg">
+                    <p class="text-soft-navy mb-4">"The care I received was exceptional. The cardiology team saved my life!"</p>
+                    <p class="text-sm font-semibold text-teal-500">— David R.</p>
+                </div>
+                <div class="testimonial-card p-6 rounded-lg">
+                    <p class="text-soft-navy mb-4">"From diagnosis to recovery, the staff were compassionate and professional."</p>
+                    <p class="text-sm font-semibold text-teal-500">— Priya S.</p>
+                </div>
+                <div class="testimonial-card p-6 rounded-lg">
+                    <p class="text-soft-navy mb-4">"The portal made booking appointments so easy and hassle-free."</p>
+                    <p class="text-sm font-semibold text-teal-500">— Anil K.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Safety and Accreditations -->
+    <section class="py-12 text-center w-full">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-soft-navy mb-6">Your Safety, Our Priority</h2>
+            <p class="text-soft-navy mb-4">We adhere to strict safety protocols, including thermal screening, mandatory masks, and regular disinfection, ensuring a safe environment for all.</p>
+            <p class="text-soft-navy font-semibold">Accredited by NABH for excellence in healthcare.</p>
+        </div>
+    </section>
+    {% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
+
+    <script>
+        const searchInput = document.getElementById('hospital-search');
+        const hospitalCards = document.querySelectorAll('.hospital-card');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            hospitalCards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                card.style.display = name.includes(query) ? 'block' : 'none';
+            });
+        });
+
+        // Modal functionality (existing)
+        const modal = document.getElementById('slotModal');
+        const createSlotBtn = document.getElementById('createSlotBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        const openModal = () => {
+            modal.style.display = 'flex';
+        };
+
+        if (createSlotBtn) createSlotBtn.addEventListener('click', openModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+
+        // --- AJAX for department dropdown based on hospital selection ---
+        // Ensure IDs are set
+        const hospitalSelect = document.getElementsByName('hospital')[0];
+        const departmentSelect = document.getElementsByName('department')[0];
+        if (hospitalSelect) hospitalSelect.id = 'id_hospital';
+        if (departmentSelect) departmentSelect.id = 'id_department';
+
+        document.getElementById('id_hospital').addEventListener('change', function() {
+            var hospitalId = this.value;
+            var departmentSelect = document.getElementById('id_department');
+            departmentSelect.innerHTML = '<option value="">Select Department</option>'; // Clear
+
+            if (hospitalId) {
+                fetch(`/hospital/ajax/get-departments/?hospital_id=${hospitalId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(function(dept) {
+                            var option = document.createElement('option');
+                            option.value = dept.id;
+                            option.text = dept.name;
+                            departmentSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    
+    </script>
+{% endblock %}

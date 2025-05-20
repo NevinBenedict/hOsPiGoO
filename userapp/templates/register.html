@@ -1,0 +1,99 @@
+{% extends 'loginbase.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+    <style>
+        .btn-primary {
+            background: linear-gradient(to right, #4B5EAA, #D4A017) !important;
+            color: #fff !important;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            transition: background 0.3s ease, transform 0.2s ease;
+            z-index: 10;
+            opacity: 1;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #D4A017, #4B5EAA) !important;
+            transform: scale(1.05);
+        }
+        .text-pastel-navy { color: #4B5EAA; }
+        .text-pastel-gold { color: #D4A017; }
+        .text-navy-800 { color: #1e3a8a; }
+        .text-pastel-red { color: #dc2626; }
+        .border-pastel-navy { border-color: #4B5EAA; }
+        .focus\:ring-pastel-navy:focus { --tw-ring-color: #4B5EAA; }
+    </style>
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md mt-8 animate-fadeIn">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-pastel-navy">Create an account</h1>
+            <p class="text-sm text-navy-800 mt-2">To access health services</p>
+        </div>
+
+        <!-- Form Errors -->
+        {% if form.non_field_errors %}
+            <div class="mb-4 p-3 bg-red-100 border border-red-400 text-pastel-red rounded">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-pastel-navy">First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <p class="text-pastel-red text-xs mt-1" id="first_name_error">{{ form.first_name.errors }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-pastel-navy">Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <p class="text-pastel-red text-xs mt-1" id="last_name_error">{{ form.last_name.errors }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-pastel-navy">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <p class="text-pastel-red text-xs mt-1" id="username_error">{{ form.username.errors }}</p>
+                {% endif %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-pastel-navy">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-pastel-red text-xs mt-1" id="email_error">{{ form.email.errors }}</p>
+                    {% endif %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-pastel-navy">Phone</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <p class="text-pastel-red text-xs mt-1" id="phone_error">{{ form.phone.errors }}</p>
+                    {% endif %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-pastel-navy">Password</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <p class="text-pastel-red text-xs mt-1" id="password_error">{{ form.password.errors }}</p>
+                    {% endif %}
+                </div>
+                <div class="text-sm text-navy-800 mb-6">
+                    By selecting <strong>Create account</strong>, you agree to our
+                    <a href="#" class="text-pastel-navy hover:text-pastel-gold">User Agreement</a> and acknowledge reading our
+                    <a href="#" class="text-pastel-navy hover:text-pastel-gold">User Privacy Notice</a>.
+                </div>
+                <button type="submit" class="btn-primary w-full">Create account</button>
+            </form>
+
+            <!-- Footer -->
+            
+        
+{% endblock %}

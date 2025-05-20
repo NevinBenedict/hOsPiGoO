@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+    <div class="max-w-4xl mx-auto w-100 dashboard-container p-8">
+        <!-- Doctor Information -->
+        <div class="mb-8">
+            <!-- <h1 class="text-3xl font-bold mb-4 text-center text-navy-800">Doctor Dashboard</h1> -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-pastel-navy">Doctor Profile</h2>
+                {% if doctor %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-pastel-navy" style="font-variant: small-caps;"><span class="font-semibold" >Name:</span> {{ request.user }}</p>
+                            <p class="text-pastel-navy" style="font-variant: small-caps;"><span class="font-semibold">Hospital:</span> {{ doctor.hospital|default:"General Medicine" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-pastel-navy" style="font-variant: small-caps;"><span class="font-semibold">Specialization:</span> {{ doctor.department|default:"General Medicine" }}</p>
+                            <p class="text-pastel-navy" style="font-variant: small-caps;"><span class="font-semibold">Email:</span> {{ doctor.doctor.email|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-center text-pastel-navy">Doctor profile information not available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Patient Statistics -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-pastel-navy">Patient Statistics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% if patient %}
+                    <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                        <p class="text-3xl font-bold text-pastel-gold">{{ patients_con|default:0 }}</p>
+                        <p class="text-pastel-navy">Total Patients Consulted</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                        <p class="text-3xl font-bold text-pastel-gold">{{ p_count|default:0 }}</p>
+                        <p class="text-pastel-navy">Patients (Last 30 Days)</p>
+                    </div>
+                {% else %}
+                    <p class="text-center text-pastel-navy">Patient statistics not available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Appointment Slots -->
+        <div>
+            <h2 class="text-2xl font-semibold mb-4 text-pastel-navy">Appointment Slots</h2>
+            {% if error %}
+                <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {{ error }}
+                </div>
+            {% endif %}
+            {% if appointmentslot %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for slot in appointmentslot %}
+                        <div class="slot-card border border-pastel-navy rounded-lg p-6 shadow-md bg-white">
+                            <a href="{% url 'slotdisplay' slot.id %}">
+                                <div class="mb-3">
+                                    <span class="font-semibold text-pastel-navy">Date:</span>
+                                    <span class="ml-2 text-navy-800">{{ slot.date }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="font-semibold text-pastel-navy">Time:</span>
+                                    <span class="ml-2 text-navy-800">{{ slot.time }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="font-semibold text-pastel-navy">Total Slots:</span>
+                                    <span class="ml-2 text-navy-800">{{ slot.slot_number }}</span>
+                                </div>
+                            </a>
+                            <form action="{% url 'slotdelete' slot.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-slot-btn text-pastel-red hover:text-red-700 font-medium text-sm mt-2"
+                                    onclick="return confirm('Are you sure you want to delete this slot?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-center text-pastel-navy no-slots">No slots available. Create a new slot using the navigation menu.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Slot Exists Popup -->
+    {% if slot_exists_popup %}
+        <script>
+            window.onload = function() {
+                alert("A slot for this date already exists!");
+            }
+        </script>
+    {% endif %}
+{% endblock %}

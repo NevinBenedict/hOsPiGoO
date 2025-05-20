@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Home - Hospitals</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 py-8">
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center text-blue-700">Available Hospitals</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for i in data %}
+            <a href="{% url 'doctorlist' i.id %}" class="block">
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center">
+                <img src="https://cdn-icons-png.flaticon.com/512/33/33777.png" alt="Hospital Icon" class="w-20 h-20 mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ i.name }}</h2>
+                <p class="text-gray-600 mb-1"><span class="font-medium">Place:</span> {{ i.place }}</p>
+                <p class="text-gray-600 mb-1"><span class="font-medium">Email:</span> {{ i.email }}</p>
+                <!-- Add more hospital details here if needed -->
+            </div>
+            {% empty %}
+            <div class="col-span-3 text-center text-gray-500">No hospitals available.</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

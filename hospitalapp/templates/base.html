@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Doctor Portal{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Georgia', 'Roboto', serif;
+            font-size: 16px; /* Ensure legible font size */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+        .content-container {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hamburger div {
+            transition: all 0.3s ease;
+        }
+        .hamburger.active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active .line2 {
+            opacity: 0;
+        }
+        .hamburger.active .line3 {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        /* Dark pastel colors */
+        .text-pastel-navy {
+            color: #4B5EAA; /* Dark pastel navy for primary text */
+        }
+        .text-pastel-gold {
+            color: #D4A017; /* Dark pastel gold for logo and hover */
+        }
+        .text-pastel-red {
+            color: #FCA5A5; /* Dark pastel red for logout */
+        }
+        .bg-pastel-gray {
+            background-color: #6B7280; /* Dark pastel gray for hamburger lines */
+        }
+        .text-navy-800 {
+            color: #1e3a8a; /* Dark navy for main content */
+        }
+        /* Modal and button styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #585a60, #4d4b45); /* Pastel navy to gold */
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #373635, #414145);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-navy-800 shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{% url 'doctorhome' %}" class="text-2xl font-bold text-pastel-gold">Doctor Portal</a>
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-6">
+                <a href="{% url 'doctorhome' %}" class="nav-link text-pastel-navy hover:text-pastel-gold">Home</a>
+                <button id="createSlotBtn" class="nav-link text-pastel-navy hover:text-pastel-gold  rounded-lg">Create Slot</button>
+                <a href="{% url 'appdoctor' %}" class="nav-link text-pastel-navy hover:text-pastel-gold">Appointments</a>
+                <a href="{% url 'logout' %}" class="nav-link text-pastel-red hover:text-red-400">Logout</a>
+            </div>
+            <!-- Hamburger Menu -->
+            <div class="md:hidden flex items-center">
+                <button class="hamburger focus:outline-none">
+                    <div class="line1 w-6 h-0.5 bg-pastel-gray mb-1.5"></div>
+                    <div class="line2 w-6 h-0.5 bg-pastel-gray mb-1.5"></div>
+                    <div class="line3 w-6 h-0.5 bg-pastel-gray"></div>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-navy-800 px-4 py-2">
+            <a href="{% url 'doctorhome' %}" class="block py-2 nav-link text-pastel-navy hover:text-pastel-gold">Home</a>
+            <button id="createSlotBtnMobile" class="block py-2 nav-link btn-primary text-pastel-navy hover:text-pastel-gold w-full text-left">Create Slot</button>
+            <a href="{% url 'appdoctor' %}" class="block py-2 nav-link text-pastel-navy hover:text-pastel-gold">Appointments</a>
+            <a href="{% url 'logout' %}" class="block py-2 nav-link text-pastel-red hover:text-red-400">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 content-container text-navy-800">
+        {% block content %}
+            <!-- Fallback content to ensure visibility -->
+            <p class="text-center text-lg">Welcome to the Doctor Portal. Please select an option from the navigation menu.</p>
+        {% endblock %}
+    </main>
+
+    <!-- Modal for creating a slot -->
+    <div id="slotModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-semibold mb-6 text-pastel-navy">Create Appointment Slot</h2>
+            <form id="slotForm" action="{% url 'slotcreation' %}" method="POST">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="date" class="block text-pastel-navy font-medium mb-2">Date</label>
+                    <input type="date" id="date" name="date" min="{{min_date}}" max="{{max_date}}" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-navy" required>
+                </div>
+                <div class="mb-4">
+                    <label for="time" class="block text-pastel-navy font-medium mb-2">Time</label>
+                    <input type="time" id="time" name="time" min="09:00" max="15:00" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-navy" required>
+                </div>
+                <div class="mb-6">
+                    <label for="slot_number" class="block text-pastel-navy font-medium mb-2">Total Slots</label>
+                    <input type="number" id="slot_number" name="slot_number" min="1" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-navy" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="cancelBtn" class="text-pastel-navy px-4 py-2 rounded hover:text-pastel-gold">Cancel</button>
+                    <button type="submit" class="btn-primary bg-gray-700 text-white px-6 py-2 rounded-lg">Create Slot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-navy-800 py-6">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-sm mb-4 md:mb-0 text-pastel-navy">
+                © {{ year|default:2025 }} Doctor Portal. All rights reserved.
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="text-pastel-navy hover:text-pastel-gold transition-colors">Facebook</a>
+                <a href="#" class="text-pastel-navy hover:text-pastel-gold transition-colors">Twitter</a>
+                <a href="#" class="text-pastel-navy hover:text-pastel-gold transition-colors">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Hamburger Menu and Modal -->
+    <script>
+        // Hamburger menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const mobileMenu = document.querySelector('.mobile-menu');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('block');
+        });
+
+        // Modal functionality
+        const modal = document.getElementById('slotModal');
+        const createSlotBtn = document.getElementById('createSlotBtn');
+        const createSlotBtnMobile = document.getElementById('createSlotBtnMobile');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        // Function to open modal
+        const openModal = () => {
+            modal.style.display = 'flex';
+        };
+
+        createSlotBtn.addEventListener('click', openModal);
+        createSlotBtnMobile.addEventListener('click', openModal);
+
+        cancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
