@@ -179,3 +179,6 @@ AUTHENTICATTION_BACKENDS = (
 
 LOGIN_REDIRECT_URL = '/booking/patienthome/'
 LOGOUT_REDIRECT_URL = '/userapp/login/'
+RAZORPAY_KEY_ID="rzp_test_geSQxmqjudttbo"
+
+RAZORPAY_KEY_SECRET="vl4T8QIcv8pU8o7UF6vZAIVw"

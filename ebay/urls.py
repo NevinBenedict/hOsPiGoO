@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
+from userapp.views import *
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -25,6 +26,8 @@ urlpatterns = [
     path('hospital/', include('hospitalapp.urls')),
     path('accounts/', include('allauth.urls')),
     path('booking/', include('bookingapp.urls')),
+    path('', UserLoginView.as_view(),),
+    
     
 
 ]

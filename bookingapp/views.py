@@ -7,6 +7,7 @@ from .models import *
 from .forms import *    
 from django.contrib import messages
 from datetime import datetime, timedelta,date
+import razorpay
 
 # Create your views here.
 class SlotListView(View):
@@ -40,16 +41,25 @@ class AppointmentBookingView(View):
             return redirect('slotdisplays', pk=slot.slot.doctor.docrelate.id,)
         
         
-        appointment = AppointmentBooking.objects.create(doctor=doctor, patient=patient, slot=slot,status='Pending',appointment_date=date,appointment_time=time)
+        appointment = AppointmentBooking.objects.create(doctor=doctor, patient=patient, slot=slot,status='Pending',appointment_date=date,appointment_time=time,pay_status='Pending')
         appointment.save()
         slot.is_booked = True
         slot.save()
         
-        return redirect('slotdisplays', pk=slot.slot.doctor.docrelate.id)
+        return redirect('payintiate', pk=appointment.id)
 
     
 class PatientHomeView(View):
     def get(self, request):
+        appointment=AppointmentBooking.objects.filter(patient=request.user.id,pay_status="Cancelled")
+        if appointment:
+            for i in appointment:
+            
+                slot=Slotdivide.objects.get(id=i.slot.id)
+                slot.is_booked=False
+                slot.save()
+            appointment.delete()
+
         data=HospitalModel.objects.all()
         departments=DepartmentModel.objects.all()
         return render(request, 'patienthome.html',{'data':data,'departments':departments})
@@ -89,8 +99,91 @@ class SlotDisplayView(View):
 class AppointmentPatientDisplayView(View):
     def get(self, request):
         user = CustomUser.objects.get(id=request.user.id)
-        appointment = AppointmentBooking.objects.filter(patient=user)
+        appointment = AppointmentBooking.objects.filter(patient=user,pay_status="Success")
         return render(request, 'appointment.html', {'appointments': appointment})
 
 
+class PaymentIntiate(View):
+    def get(self,request,pk):
 
+        user=CustomUser.objects.get(id=request.user.id)
+        appointment=AppointmentBooking.objects.get(id=pk)
+
+        client = razorpay.Client(auth=("rzp_test_geSQxmqjudttbo", "vl4T8QIcv8pU8o7UF6vZAIVw"))
+
+        DATA = {
+            "amount": 500*100,
+            "currency": "INR",
+    
+                }
+        
+        data = client.order.create(data=DATA)
+        order_id = data['id']
+        summary = PaymentModel.objects.create(user=user,order_id=order_id,total=500)
+        context={'summary':summary,'Appointment':appointment,'razorpaykey_id':"rzp_test_geSQxmqjudttbo",'order_id':order_id,'amount':data['amount'],'user':user}
+        appointment.pay_status="Cancelled"
+        appointment.save()
+        return render(request,"payment.html",context)
+    
+from django.views.decorators.csrf import csrf_exempt
+
+from django.utils.decorators import method_decorator
+
+@method_decorator(csrf_exempt, name='dispatch')       
+class PaymentSuccess(View):
+    def post(self, request):
+            # Log Razorpay's callback data
+            print(request.POST)
+
+            # Extract data from the callback
+            razorpay_order_id = request.POST.get('razorpay_order_id')
+            razorpay_payment_id = request.POST.get('razorpay_payment_id')
+            razorpay_signature = request.POST.get('razorpay_signature')
+
+            # Verify Razorpay signature
+            client = razorpay.Client(auth=("rzp_test_geSQxmqjudttbo", "vl4T8QIcv8pU8o7UF6vZAIVw"))
+            try:
+                client.utility.verify_payment_signature({
+                    'razorpay_order_id': razorpay_order_id,
+                    'razorpay_payment_id': razorpay_payment_id,
+                    'razorpay_signature': razorpay_signature
+                })
+            except razorpay.errors.SignatureVerificationError:
+                print("Payment verification failed.")
+                messages.error(request, "Payment verification failed. Please try again.")
+                return redirect('patienthome')
+
+            # Ensure the user is authenticated
+            if not request.user.is_authenticated:
+                print("User is not authenticated.")
+                
+                order_items = AppointmentBooking.objects.filter(patient=user, status="pending")
+                for i in order_items:
+                    i.pay_status="Cancelled"
+                    i.save()
+                messages.error(request, "Something went wrong. Order Cancelled")
+                return redirect('patienthome')
+
+            # Fetch the user
+            
+            
+            user = CustomUser.objects.get(id=request.user.id)
+
+            # Update payment status in the database
+            summary = PaymentModel.objects.filter(user=user, payment_status=False)
+            for i in summary:
+                i.payment_status = True
+                i.payment_id = razorpay_payment_id
+                i.save()
+
+            # Update stock and order item status
+            
+            order_items = AppointmentBooking.objects.filter(patient=user, status="pending")
+            for i in order_items:
+                i.pay_status = "Success"
+                i.save()
+
+            messages.success(request, "Payment successful! Your order has been placed.")
+            return redirect('patienthome')
+
+       

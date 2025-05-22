@@ -97,11 +97,19 @@ class SlotDisplayView(View):
         
         doctor = CustomUser.objects.get(id=request.user.id)
         slots = Slotdivide.objects.filter(slot=pk,slot__doctor=doctor)
-        return render(request, 'slotdisplay.html', {'slots': slots})
+        min_date = (date.today() + timedelta(days=1)).isoformat()
+        max_date = (date.today() + timedelta(days=7)).isoformat()
+        return render(request, 'slotdisplay.html', {'slots': slots,'min_date':min_date,"max_date":max_date})
 
 class SlotDelete(View):
     def post(self, request, pk):
         slot = AppointmentSlot.objects.get(id=pk,doctor=request.user)
+        appointment=AppointmentBooking.objects.filter(slot__slot=slot)
+        for i in appointment:
+            print(i.status)
+            i.status="Cancelled by Doctor"
+            i.save()
+            print(i.status)
         slot.delete()
         return redirect('doctorhome')
 
@@ -109,21 +117,25 @@ class AppointmentDoctorDisplay(View):
     def get(self, request):
         user = CustomUser.objects.get(id=request.user.id)
         print(user)
-        appointment = AppointmentBooking.objects.filter(doctor=user)
+        min_date = (date.today() + timedelta(days=1)).isoformat()
+        max_date = (date.today() + timedelta(days=7)).isoformat()
+        appointment = AppointmentBooking.objects.filter(doctor=user,pay_status="Success")
         for i in appointment:
             if (i.appointment_date+timedelta(days=2)<date.today()) and (i.status=="pending"):
 
                 i.status="Cancelled"
                 i.save()
-        return render(request, 'appointmentdoctor.html', {'appointments': appointment})
+        return render(request, 'appointmentdoctor.html', {'appointments': appointment,'min_date':min_date,'max_date':max_date})
 
 class AppointmentDetailDisplay(View):
     def get(self, request, pk):
         slot = Slotdivide.objects.get(id=pk)
         
         appointment = AppointmentBooking.objects.get(slot=slot.id)
+        min_date = (date.today() + timedelta(days=1)).isoformat()
+        max_date = (date.today() + timedelta(days=7)).isoformat()
         
-        return render(request, 'appointmentdetai.html', {'appointment': appointment})
+        return render(request, 'appointmentdetai.html', {'appointment': appointment,'min_date':min_date,"max_date":max_date})
 
 class Appointmentstatus(View):
     def get(self, request, pk):
